@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>Mensagens:</p>
+
+<ul>
+    {% for chat in chats %}
+        <li>
+            <strong>{{ chat.date_added|date:"d/m/Y H:i"}}</strong> - {{chat.owner.username}}
+            {{ chat.text|linebreaks }}
+        </li>
+    {% empty %}
+        <li>Sem mensagens ainda. Seja o primeiro a enviar!</li>
+    {% endfor %}
+</ul>
+
+<form action="{% url 'chat' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Enviar</button>
+</form>
+{% endblock content %}

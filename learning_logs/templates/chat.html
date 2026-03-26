@@ -1,0 +1,214 @@
+<script>
+    /* Para sempre ir para a última mensagen enviada */
+    window.addEventListener("load", function () {
+        const chatBox = document.querySelector('.chat-messages');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+</script>
+
+<script>
+    /* Para trocar de pagina */
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            window.location.href = "https://www.omni.com.br/";
+        }
+    });
+</script>
+
+<script>
+    /* Para enviar com o Enter */
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector('textarea[name="text"]');
+        const form = document.getElementById('chatForm');
+
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    });
+</script>
+
+<script>
+    /* Para sempre manter o foco no chat */
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector('input[name="text"], textarea[name="text"]');
+
+        if (input) {
+            input.focus();
+        }
+    });
+</script>
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .chat-container {
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+        background: #f5f5f5;
+    }
+
+    .chat-header {
+        padding: 15px;
+        background: #4CAF50;
+        color: white;
+        font-weight: bold;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message {
+        max-width: 70%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+    }
+
+    .message.self {
+        align-self: flex-end;
+        background: #DCF8C6;
+    }
+
+    .message.other {
+        align-self: flex-start;
+        background: white;
+    }
+
+    .message-info {
+        font-size: 12px;
+        color: gray;
+        margin-bottom: 5px;
+    }
+
+    .chat-form {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background: white;
+    }
+
+    .chat-form input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+
+    .chat-form button {
+        margin-left: 10px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 50%;
+        background: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    .emoji-picker {
+        position: absolute;
+        bottom: 70px;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 10px;
+        display: none;
+    }
+</style>
+
+<div class="chat-container">
+
+    <div class="chat-header">
+        💬 Nosso chat safe ^^
+    </div>
+
+    <div class="chat-messages" id="chatBox">
+        {% for chat in chats %}
+        <div class="message {% if chat.owner == request.user %}self{% else %}other{% endif %}">
+
+            <div class="message-info">
+                {% if chat.owner == request.user %}
+                Você
+                {% else %}
+                {{ chat.owner.username }}
+                {% endif %}
+                • {{ chat.date_added|date:"H:i" }}
+            </div>
+
+            <div>
+                {{ chat.text|linebreaks }}
+            </div>
+
+        </div>
+        {% empty %}
+        <p>Sem mensagens ainda.</p>
+        {% endfor %}
+    </div>
+
+    <form class="chat-form" id="chatForm" method="post">
+        {% csrf_token %}
+
+        <button type="button" onclick="toggleEmoji()">😊</button>
+
+        {{ form.text }}
+
+        <button type="submit">➤</button>
+    </form>
+
+    <div class="emoji-picker" id="emojiPicker">
+        <span>😀</span>
+        <span>😁</span>
+        <span>😂</span>
+        <span>🤣</span>
+        <span>😍</span>
+        <span>😎</span>
+        <span>😢</span>
+        <span>😡</span>
+        <span>👍</span>
+        <span>👎</span>
+        <span>❤️</span>
+        <span>🎉</span>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const input = document.querySelector('textarea[name="text"]');
+        const picker = document.getElementById("emojiPicker");
+
+        // abrir/fechar
+        window.toggleEmoji = function () {
+            picker.style.display = picker.style.display === "block" ? "none" : "block";
+        };
+
+        // clicar no emoji
+        picker.addEventListener("click", function (e) {
+            if (e.target.tagName === "SPAN") {
+                input.value += e.target.textContent;
+                input.focus();
+            }
+        });
+
+    });
+</script>
+
+{% endblock content %}
